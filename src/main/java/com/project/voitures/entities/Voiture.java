@@ -2,10 +2,14 @@ package com.project.voitures.entities;
 
 import java.util.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 @Entity
 public class Voiture {
 
@@ -14,6 +18,8 @@ public class Voiture {
 	private Long idVoiture;
 	private String modele;
 	private Double prixVoiture;
+	@Temporal(TemporalType.DATE)
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private Date dateCreation;
 	
 	

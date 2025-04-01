@@ -41,22 +41,36 @@ public class VoitureController {
 	}
 
 	@RequestMapping("/showCreate")
-	public String showCreate() {
-		return "createVoiture";
+	public String showCreate(ModelMap modelMap) {
+		modelMap.addAttribute("voiture", new Voiture());
+		modelMap.addAttribute("mode", "new");
+		return "formVoiture";
 	}
 
 	@RequestMapping("/saveVoiture")
-	public String saveVoiture(@ModelAttribute("voiture") Voiture voiture, @RequestParam("date") String date,
-			ModelMap modelMap) throws ParseException {
-
+	public String saveVoiture(@ModelAttribute("voiture") Voiture voiture, @RequestParam("dateCreation") String date,
+			ModelMap modelMap,@RequestParam (name="page",defaultValue = "0") int page,
+			@RequestParam (name="size", defaultValue = "2") int size) throws ParseException {
+		int currentPage;
+		if(voiture.getIdVoiture()==null) {
 		SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
 		Date dateCreation = dateformat.parse(String.valueOf(date));
 		voiture.setDateCreation(dateCreation);
 
 		Voiture saveVoiture = voitureService.saveVoiture(voiture);
 		String msg = "Voiture enregistré avec Id " + saveVoiture.getIdVoiture();
+		Page<Voiture> voits = voitureService.getAllVoituresParPage(page, size);
+		currentPage = voits.getTotalPages()-1;
 		modelMap.addAttribute("msg", msg);
-		return "createVoiture";
+		modelMap.addAttribute("voitures", voits);
+		modelMap.addAttribute("pages", new int[voits.getTotalPages()]);
+		modelMap.addAttribute("page", currentPage);
+		modelMap.addAttribute("size", size);
+		}else 
+			{
+			currentPage=page;
+			}
+		return ("redirect:/ListeVoitures?page="+currentPage+"&size="+size);
 	}
 
 	@RequestMapping("/supprimerVoiture")
@@ -74,21 +88,27 @@ public class VoitureController {
 	}
 
 	@RequestMapping("/modifierVoiture")
-	public String editerProduit(@RequestParam("id") Long id, ModelMap modelMap) {
+	public String editerVoiture(@RequestParam("id") Long id, ModelMap modelMap,
+			@RequestParam (name="page",defaultValue = "0") int page,
+			@RequestParam (name="size", defaultValue = "2") int size) {
 		Voiture v = voitureService.getVoiture(id);
 		modelMap.addAttribute("voiture", v);
-		return "editerVoiture";
+		modelMap.addAttribute("mode", "edit");
+		modelMap.addAttribute("page", page);
+		modelMap.addAttribute("size", size);
+		return "formVoiture";
 	}
 
 	@RequestMapping("/updateVoiture")
-	public String updateVoiture(@ModelAttribute("voiture") Voiture voiture, @RequestParam("date") String date, ModelMap modelMap) throws ParseException {
+	public String updateVoiture(@ModelAttribute("voiture") Voiture voiture, @RequestParam("dateCreation") String date, ModelMap modelMap,@RequestParam (name="page",defaultValue = "0") int page,
+			@RequestParam (name="size", defaultValue = "2") int size) throws ParseException {
 		// conversion de la date
 		SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
 		Date dateCreation = dateformat.parse(String.valueOf(date));
 		voiture.setDateCreation(dateCreation);
 
 		voitureService.updateVoiture(voiture);
-		List<Voiture> voits = voitureService.getAllVoitures();
+		Page<Voiture> voits = voitureService.getAllVoituresParPage(page, size);
 		modelMap.addAttribute("voitures", voits);
 		return "listeVoitures";
 	}
